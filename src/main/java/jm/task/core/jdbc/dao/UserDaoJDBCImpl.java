@@ -10,15 +10,7 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
     private final String TABLE_NAME = "users_db.users";
-
     private Statement statement;
-    {
-        try {
-            statement = new Util().getConnection();
-        } catch (Util.DatabaseConnectionException e) {
-            System.err.println("Unable to connect to database");
-        }
-    }
 
     public UserDaoJDBCImpl() {}
 
@@ -29,59 +21,28 @@ public class UserDaoJDBCImpl implements UserDao {
                 "`last_name` VARCHAR(255) NOT NULL, " +
                 "`age` TINYINT NOT NULL, " +
                 "PRIMARY KEY (`id`))";
-        try {
-            statement.executeUpdate(command);
-        } catch (SQLTimeoutException e) {
-            System.err.println("Timeout exception was caught");
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
-        catch (SQLException e) {
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
+        execute(command);
     }
     public void dropUsersTable() {
         String command = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
-        try {
-            statement.executeUpdate(command);
-        } catch (SQLTimeoutException e) {
-            System.err.println("Timeout exception was caught");
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
-        catch (SQLException e) {
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
+        execute(command);
     }
 
     public void saveUser(String name, String lastName, byte age) {
         String command = String.format("INSERT INTO %s (name, last_name, age) VALUES (\"%s\", \"%s\", %d)",
                 TABLE_NAME, name, lastName, age);
-        try {
-            statement.executeUpdate(command);
-        } catch (SQLTimeoutException e) {
-            System.err.println("Timeout exception was caught");
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
-        catch (SQLException e) {
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
+        execute(command);
     }
 
     public void removeUserById(long id) {
         String command = String.format("DELETE FROM %s WHERE id=%d;", TABLE_NAME, id);
-        try {
-            statement.executeUpdate(command);
-        } catch (SQLTimeoutException e) {
-            System.err.println("Timeout exception was caught");
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
-        catch (SQLException e) {
-            System.err.println(Arrays.toString(e.getStackTrace()));
-        }
+        execute(command);
     }
 
     public List<User> getAllUsers() {
         List<User> result = new ArrayList<>();
-        try {
+        try (Util util = new Util()) {
+            statement = util.getConnection();
             String command = "SELECT * FROM " + TABLE_NAME + ";";
             ResultSet resultSet = statement.executeQuery(command);
             while (resultSet.next()) {
@@ -93,23 +54,30 @@ public class UserDaoJDBCImpl implements UserDao {
         } catch (SQLTimeoutException e) {
             System.err.println("Timeout exception was caught");
             System.err.println(Arrays.toString(e.getStackTrace()));
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Exception e) {
+            System.err.println("Unable to connect to database");
         }
         return result;
     }
 
     public void cleanUsersTable() {
         String command = "TRUNCATE TABLE " + TABLE_NAME + ";";
-        try {
+        execute(command);
+    }
+
+    private void execute(String command) {
+        try (Util util = new Util()) {
+            statement = util.getConnection();
             statement.executeUpdate(command);
         } catch (SQLTimeoutException e) {
             System.err.println("Timeout exception was caught");
             System.err.println(Arrays.toString(e.getStackTrace()));
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Exception e) {
+            System.err.println("Unable to connect to database");
         }
     }
 }
