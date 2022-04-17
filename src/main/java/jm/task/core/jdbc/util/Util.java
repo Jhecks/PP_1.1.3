@@ -8,11 +8,10 @@ public class Util implements AutoCloseable {
 
     public Util() {
         try {
-            // Connecting private data is in separate file Config, that is in gitIgnore
+            // Connecting private data is in separate file Config, that is in gitIgnore (schema name is: users_db)
             connection = DriverManager.getConnection(
                     Config.DB_URL, Config.USER, Config.PASS);
             statement = connection.createStatement();
-            statement.executeUpdate("CREATE NEW SCHEMA users_database;");
         } catch (Exception e) {
             throw new DatabaseConnectionException("Database connection error");
         }

@@ -5,55 +5,77 @@ import jm.task.core.jdbc.util.Util;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private final Statement statement = new Util().getConnection();
-    private final String SCHEMA_NAME = "USERS";
-    private final String TABLE_NAME = "USERS";
+    private final String TABLE_NAME = "users_db.users";
+
+    private Statement statement;
+    {
+        try {
+            statement = new Util().getConnection();
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Unable to connect to database");
+        }
+    }
 
     public UserDaoJDBCImpl() {}
 
     public void createUsersTable() {
-        String command = "CREATE SCHEMA " + SCHEMA_NAME + "; CREATE TABLE " + TABLE_NAME + " (" +
-                "user_id BIGINT NOT NULL AUTO_INCREMENT, " +
-                "user_name varchar(255) NOT NULL, " +
-                "user_lastName varchar(255) NOT NULL, " +
-                "age TINYINT NOT NULL, " +
-                "PRIMARY KEY (user_id))";
-
+        String command = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ( " +
+                "`id` BIGINT NOT NULL AUTO_INCREMENT, " +
+                "`name` VARCHAR(255) NOT NULL, " +
+                "`last_name` VARCHAR(255) NOT NULL, " +
+                "`age` TINYINT NOT NULL, " +
+                "PRIMARY KEY (`id`))";
         try {
             statement.executeUpdate(command);
-        } catch (SQLException e) {
-            //
+        } catch (SQLTimeoutException e) {
+            System.err.println("Timeout exception was caught");
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        }
+        catch (SQLException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
-
     public void dropUsersTable() {
-        String command = "USE " + SCHEMA_NAME + "; DROP TABLE IF EXISTS " + TABLE_NAME + ";";
+        String command = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
         try {
             statement.executeUpdate(command);
-        } catch (SQLException e) {
-            //
+        } catch (SQLTimeoutException e) {
+            System.err.println("Timeout exception was caught");
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        }
+        catch (SQLException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        String command = "USE " + SCHEMA_NAME + "; INSERT INTO " + TABLE_NAME + " VALUES (" +
-                name + ", " + lastName + ", " + age + ");";
+        String command = String.format("INSERT INTO %s (name, last_name, age) VALUES (\"%s\", \"%s\", %d)",
+                TABLE_NAME, name, lastName, age);
         try {
             statement.executeUpdate(command);
-        } catch (SQLException e) {
-            //
+        } catch (SQLTimeoutException e) {
+            System.err.println("Timeout exception was caught");
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        }
+        catch (SQLException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
 
     public void removeUserById(long id) {
-        String command = "USE " + TABLE_NAME + "; DELETE FROM " + TABLE_NAME + " WHERE user_id=" + id + ";";
+        String command = String.format("DELETE FROM %s WHERE id=%d;", TABLE_NAME, id);
         try {
             statement.executeUpdate(command);
-        } catch (SQLException e) {
-            //
+        } catch (SQLTimeoutException e) {
+            System.err.println("Timeout exception was caught");
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        }
+        catch (SQLException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
 
@@ -63,26 +85,31 @@ public class UserDaoJDBCImpl implements UserDao {
             String command = "SELECT * FROM " + TABLE_NAME + ";";
             ResultSet resultSet = statement.executeQuery(command);
             while (resultSet.next()) {
-                long id = resultSet.getLong(1);
-                String name = resultSet.getString("name");
-                String lastName = resultSet.getString("lastname");
-                byte age = resultSet.getByte(4);
-                User user = new User(name, lastName, age);
-                user.setId(id);
+                User user = new User(resultSet.getString("name"),
+                        resultSet.getString("last_name"), resultSet.getByte("age"));
+                user.setId(resultSet.getLong("id"));
                 result.add(user);
             }
-        } catch (Exception e) {
-            System.out.println("Something went wrong");
+        } catch (SQLTimeoutException e) {
+            System.err.println("Timeout exception was caught");
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        }
+        catch (SQLException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
         return result;
     }
 
     public void cleanUsersTable() {
-        String command = "USE " + SCHEMA_NAME + "; DROP TABLE " + TABLE_NAME + ";";
+        String command = "TRUNCATE TABLE " + TABLE_NAME + ";";
         try {
             statement.executeUpdate(command);
-        } catch (SQLException e) {
-            //
+        } catch (SQLTimeoutException e) {
+            System.err.println("Timeout exception was caught");
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        }
+        catch (SQLException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
 }
