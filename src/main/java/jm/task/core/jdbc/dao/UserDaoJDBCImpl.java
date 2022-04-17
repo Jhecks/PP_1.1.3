@@ -8,13 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private final Statement statement = Util.makeConnection();
+    private final Statement statement = new Util().getConnection();
+    private final String SCHEMA_NAME = "USERS";
     private final String TABLE_NAME = "USERS";
 
     public UserDaoJDBCImpl() {}
 
     public void createUsersTable() {
-        String command = "CREATE TABLE " + TABLE_NAME + " (" +
+        String command = "CREATE SCHEMA " + SCHEMA_NAME + "; CREATE TABLE " + TABLE_NAME + " (" +
                 "user_id BIGINT NOT NULL AUTO_INCREMENT, " +
                 "user_name varchar(255) NOT NULL, " +
                 "user_lastName varchar(255) NOT NULL, " +
@@ -29,7 +30,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        String command = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
+        String command = "USE " + SCHEMA_NAME + "; DROP TABLE IF EXISTS " + TABLE_NAME + ";";
         try {
             statement.executeUpdate(command);
         } catch (SQLException e) {
@@ -38,7 +39,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        String command = "INSERT INTO " + TABLE_NAME + " VALUES (" +
+        String command = "USE " + SCHEMA_NAME + "; INSERT INTO " + TABLE_NAME + " VALUES (" +
                 name + ", " + lastName + ", " + age + ");";
         try {
             statement.executeUpdate(command);
@@ -48,7 +49,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        String command = "DELETE FROM " + TABLE_NAME + " WHERE user_id=" + id + ";";
+        String command = "USE " + TABLE_NAME + "; DELETE FROM " + TABLE_NAME + " WHERE user_id=" + id + ";";
         try {
             statement.executeUpdate(command);
         } catch (SQLException e) {
@@ -71,13 +72,13 @@ public class UserDaoJDBCImpl implements UserDao {
                 result.add(user);
             }
         } catch (Exception e) {
-            //
+            System.out.println("Something went wrong");
         }
         return result;
     }
 
     public void cleanUsersTable() {
-        String command = "DROP TABLE " + TABLE_NAME + ";";
+        String command = "USE " + SCHEMA_NAME + "; DROP TABLE " + TABLE_NAME + ";";
         try {
             statement.executeUpdate(command);
         } catch (SQLException e) {
