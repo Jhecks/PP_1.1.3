@@ -14,6 +14,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public UserDaoJDBCImpl() {}
 
     public void createUsersTable() {
+        //String formatting in case we want to change table name
         String command = String.format("CREATE TABLE IF NOT EXISTS %s (" +
                 "`id` BIGINT NOT NULL AUTO_INCREMENT, " +
                 "`name` VARCHAR(255) NOT NULL, " +
@@ -25,10 +26,15 @@ public class UserDaoJDBCImpl implements UserDao {
              PreparedStatement preparedStatement = connection.prepareStatement(command)) {
             preparedStatement.execute();
 
+        } catch (SQLTimeoutException e) {
+            System.err.println("Timeout exception was caught");
+            System.err.println(Arrays.toString(e.getStackTrace()));
         } catch (SQLException e) {
-            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Unable to connect to database");
         }
     }
 
@@ -43,6 +49,8 @@ public class UserDaoJDBCImpl implements UserDao {
             System.err.println(Arrays.toString(e.getStackTrace()));
         } catch (SQLException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
             System.err.println("Unable to connect to database");
         }
@@ -62,6 +70,8 @@ public class UserDaoJDBCImpl implements UserDao {
             System.err.println(Arrays.toString(e.getStackTrace()));
         } catch (SQLException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
             System.err.println("Unable to connect to database");
         }
@@ -79,6 +89,8 @@ public class UserDaoJDBCImpl implements UserDao {
             System.err.println(Arrays.toString(e.getStackTrace()));
         } catch (SQLException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
             System.err.println("Unable to connect to database");
         }
@@ -102,6 +114,8 @@ public class UserDaoJDBCImpl implements UserDao {
             System.err.println(Arrays.toString(e.getStackTrace()));
         } catch (SQLException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
             System.err.println("Unable to connect to database");
         }
@@ -119,6 +133,8 @@ public class UserDaoJDBCImpl implements UserDao {
             System.err.println(Arrays.toString(e.getStackTrace()));
         } catch (SQLException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
             System.err.println("Unable to connect to database");
         }
