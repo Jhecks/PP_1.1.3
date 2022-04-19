@@ -22,7 +22,6 @@ public class Util implements AutoCloseable {
         if (type.equals(connectionType.JDBC)) {
             try {
                 // Connecting private data is in separate file Config, that is in gitIgnore (schema name is: users_db)
-                System.out.println("JDBC connecting");
                 connection = DriverManager.getConnection(
                         Config.DB_URL, Config.USER, Config.PASS);
             } catch (Exception e) {
@@ -32,7 +31,6 @@ public class Util implements AutoCloseable {
             }
         } else {
             try {
-                System.out.println("Hibernate setup");
                 StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
 
                 Map<String, String> settings = new HashMap<>();
@@ -76,11 +74,9 @@ public class Util implements AutoCloseable {
     public void close() throws Exception {
         if (connection != null) {
             connection.close();
-            System.out.println("JDBC connection closed");
         }
         if (sessionFactory != null) {
             sessionFactory.close();
-            System.out.println("Hibernate connection closed");
         }
     }
 
