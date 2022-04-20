@@ -1,22 +1,22 @@
 package jm.task.core.jdbc.util;
 
+import jm.task.core.jdbc.model.User;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.Metadata;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.service.ServiceRegistry;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 public class Util implements AutoCloseable {
     //JDBC
     private final Connection connection;
 
     // Hibernate
-    private final SessionFactory sessionFactory;
+    private final Session session;
 
     public Util(connectionType type) {
         if (type.equals(connectionType.JDBC)) {
@@ -27,32 +27,26 @@ public class Util implements AutoCloseable {
             } catch (Exception e) {
                 throw new DatabaseConnectionException("Database connection error");
             } finally {
-                sessionFactory = null;
+                session = null;
             }
         } else {
             try {
-                StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
-
-                Map<String, String> settings = new HashMap<>();
+                Configuration configuration = new Configuration();
+                Properties settings = new Properties();
                 settings.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
                 settings.put(Environment.URL, Config.DB_URL);
                 settings.put(Environment.USER, Config.USER);
                 settings.put(Environment.PASS, Config.PASS);
-                settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
-                // Apply settings
-                registryBuilder.applySettings(settings);
+                settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQL8Dialect");
+                settings.put(Environment.SHOW_SQL, "true");
+                settings.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+                configuration.setProperties(settings);
+                configuration.addAnnotatedClass(User.class);
 
-                // Create registry
-                StandardServiceRegistry registry = registryBuilder.build();
-
-                // Create MetadataSources
-                MetadataSources sources = new MetadataSources(registry);
-
-                // Create Metadata
-                Metadata metadata = sources.getMetadataBuilder().build();
-
-                // Create SessionFactory
-                sessionFactory = metadata.getSessionFactoryBuilder().build();
+                ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                        .applySettings(configuration.getProperties()).build();
+                SessionFactory sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+                session = sessionFactory.openSession();
 
             } catch (Exception e) {
                 throw new DatabaseConnectionException("Database hibernate connection error");
@@ -66,8 +60,8 @@ public class Util implements AutoCloseable {
         return connection;
     }
 
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
+    public Session getSession() {
+        return session;
     }
 
     @Override
@@ -75,8 +69,8 @@ public class Util implements AutoCloseable {
         if (connection != null) {
             connection.close();
         }
-        if (sessionFactory != null) {
-            sessionFactory.close();
+        if (session != null) {
+            session.close();
         }
     }
 
