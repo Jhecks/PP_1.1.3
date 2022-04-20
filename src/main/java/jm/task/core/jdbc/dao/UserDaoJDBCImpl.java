@@ -26,7 +26,6 @@ public class UserDaoJDBCImpl implements UserDao {
             Connection connection = util.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(command);
             preparedStatement.execute();
-
         } catch (SQLTimeoutException e) {
             System.err.println("Timeout exception was caught");
             System.err.println(Arrays.toString(e.getStackTrace()));
