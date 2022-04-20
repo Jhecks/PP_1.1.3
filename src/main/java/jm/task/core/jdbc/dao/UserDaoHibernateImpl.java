@@ -2,6 +2,7 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -9,14 +10,17 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
     private final String TABLE_NAME = "users_db.users";
     Util.connectionType connectionType = Util.connectionType.Hibernate;
-    public UserDaoHibernateImpl() {}
 
+    public UserDaoHibernateImpl() {}
 
     @Override
     public void createUsersTable() {
@@ -30,8 +34,12 @@ public class UserDaoHibernateImpl implements UserDao {
             Session session = util.getSession();
             session.beginTransaction();
             session.createSQLQuery(command).executeUpdate();
+        } catch (HibernateException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
-            //
+            System.err.println("Unable to connect to database");
         }
 
     }
@@ -43,8 +51,12 @@ public class UserDaoHibernateImpl implements UserDao {
             Session session = util.getSession();
             session.beginTransaction();
             session.createSQLQuery(command).executeUpdate();
+        } catch (HibernateException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
-            //
+            System.err.println("Unable to connect to database");
         }
     }
 
@@ -55,8 +67,12 @@ public class UserDaoHibernateImpl implements UserDao {
             Transaction transaction = session.beginTransaction();
             session.save(new User(name, lastName, age));
             transaction.commit();
+        } catch (HibernateException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
-            //
+            System.err.println("Unable to connect to database");
         }
     }
 
@@ -67,8 +83,12 @@ public class UserDaoHibernateImpl implements UserDao {
             Transaction transaction = session.beginTransaction();
             session.delete(session.get(User.class, id));
             transaction.commit();
+        } catch (HibernateException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
-            //
+            System.err.println("Unable to connect to database");
         }
     }
 
@@ -85,8 +105,12 @@ public class UserDaoHibernateImpl implements UserDao {
             TypedQuery<User> allQuery = session.createQuery(all);
             result = allQuery.getResultList();
             transaction.commit();
+        } catch (HibernateException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
-            //
+            System.err.println("Unable to connect to database");
         }
         return result;
     }
@@ -98,8 +122,12 @@ public class UserDaoHibernateImpl implements UserDao {
             Session session = util.getSession();
             session.beginTransaction();
             session.createSQLQuery(command).executeUpdate();
+        } catch (HibernateException e) {
+            System.err.println(Arrays.toString(e.getStackTrace()));
+        } catch (Util.DatabaseConnectionException e) {
+            System.err.println("Connection in Util class failed");
         } catch (Exception e) {
-            //
+            System.err.println("Unable to connect to database");
         }
     }
 }
