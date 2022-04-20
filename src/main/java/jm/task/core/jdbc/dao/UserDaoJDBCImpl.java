@@ -10,7 +10,8 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
     private final String TABLE_NAME = "users_db.users";
-
+    private final Util.connectionType connectionType = Util.connectionType.JDBC;
+  
     public UserDaoJDBCImpl() {}
 
     public void createUsersTable() {
@@ -18,11 +19,10 @@ public class UserDaoJDBCImpl implements UserDao {
         String command = String.format("CREATE TABLE IF NOT EXISTS %s (" +
                 "`id` BIGINT NOT NULL AUTO_INCREMENT, " +
                 "`name` VARCHAR(255) NOT NULL, " +
-                "`last_name` VARCHAR(255) NOT NULL, " +
+                "`lastName` VARCHAR(255) NOT NULL, " +
                 "`age` TINYINT NOT NULL, " +
                 "PRIMARY KEY (`id`))", TABLE_NAME);
-
-        try (Util util = new Util()) {
+        try (Util util = new Util(connectionType)) {
             Connection connection = util.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(command);
             preparedStatement.execute();
@@ -41,8 +41,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void dropUsersTable() {
         String command = String.format("DROP TABLE IF EXISTS %s;", TABLE_NAME);
-
-        try (Util util = new Util()) {
+        try (Util util = new Util(connectionType)) {
             Connection connection = util.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(command);
             preparedStatement.execute();
@@ -59,9 +58,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        String command = String.format("INSERT INTO %s (name, last_name, age) VALUES (?, ?, ?)", TABLE_NAME);
-
-        try (Util util = new Util()) {
+        String command = String.format("INSERT INTO %s (name, lastName, age) VALUES (?, ?, ?)", TABLE_NAME);
+        try (Util util = new Util(connectionType)) {
             Connection connection = util.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(command);
             preparedStatement.setString(1, name);
@@ -82,8 +80,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         String command = String.format("DELETE FROM %s WHERE id=?;", TABLE_NAME);
-
-        try (Util util = new Util()) {
+        try (Util util = new Util(connectionType)) {
             Connection connection = util.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(command);
             preparedStatement.setLong(1, id);
@@ -103,14 +100,13 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         String command = String.format("SELECT * FROM %s;", TABLE_NAME);
         List<User> result = new ArrayList<>();
-
-        try (Util util = new Util()) {
+        try (Util util = new Util(connectionType)) {
             Connection connection = util.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(command);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 User user = new User(resultSet.getString("name"),
-                        resultSet.getString("last_name"), resultSet.getByte("age"));
+                        resultSet.getString("lastName"), resultSet.getByte("age"));
                 user.setId(resultSet.getLong("id"));
                 result.add(user);
             }
@@ -129,8 +125,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() {
         String command = String.format("TRUNCATE TABLE %s;", TABLE_NAME);
-
-        try (Util util = new Util()) {
+        try (Util util = new Util(connectionType)) {
             Connection connection = util.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(command);
             preparedStatement.execute();
