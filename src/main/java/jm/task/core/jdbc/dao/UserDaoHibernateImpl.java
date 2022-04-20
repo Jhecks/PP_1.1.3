@@ -5,6 +5,10 @@ import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,12 +74,16 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        String command = String.format("FROM %S", TABLE_NAME);
         List<User> result = new ArrayList<>();
         try (Util util = new Util(connectionType)) {
             Session session = util.getSession();
             Transaction transaction = session.beginTransaction();
-            result = session.createCriteria(User.class).list();
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<User> cq = cb.createQuery(User.class);
+            Root<User> rootEntry = cq.from(User.class);
+            CriteriaQuery<User> all = cq.select(rootEntry);
+            TypedQuery<User> allQuery = session.createQuery(all);
+            result = allQuery.getResultList();
             transaction.commit();
         } catch (Exception e) {
             //
