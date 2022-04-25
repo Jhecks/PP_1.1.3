@@ -6,10 +6,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -96,12 +92,7 @@ public class UserDaoHibernateImpl implements UserDao {
         try (Util util = new Util(connectionType)) {
             Session session = util.getSession();
             Transaction transaction = session.beginTransaction();
-            CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<User> cq = cb.createQuery(User.class);
-            Root<User> rootEntry = cq.from(User.class);
-            CriteriaQuery<User> all = cq.select(rootEntry);
-            TypedQuery<User> allQuery = session.createQuery(all);
-            result = allQuery.getResultList();
+            result = session.createQuery(String.format("FROM %s", User.class.getSimpleName())).list();
             transaction.commit();
         } catch (HibernateException e) {
             System.err.println(Arrays.toString(e.getStackTrace()));
